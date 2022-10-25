@@ -11,24 +11,30 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _loggingIn = false;
-  static const _token = 'token';
+  late String token;
+  final Future <SharedPreferences> _prefs = SharedPreferences.getInstance();
   TextEditingController tokenController = TextEditingController();
   TextEditingController sucursalController = TextEditingController();
 
+
+  Future<void> _setToken(token) async {
+    SharedPreferences prefs = await _prefs;
+    await prefs.setString('token', tokenController.text.toString());
+
+  }
+
+  Future<void> _getToken() async {
+    SharedPreferences prefs = await _prefs;
+    token = prefs.getString('token').toString();
+  }
+
+
+  @override
   void initState() {
     super.initState();
-    _getToken;
+    _getToken();
   }
 
-  Future<String> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_token).toString();
-  }
-
-  Future _setToken(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.setString(_token, tokenController.text.toString());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                   onPressed: () {
                     _setToken;
-                    _getToken;
-                    print('${_token.toString()}');
+                    print(token);
                   },
                   child: Text('Guardar')),
             ],
