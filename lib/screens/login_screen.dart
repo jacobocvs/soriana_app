@@ -11,23 +11,39 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _loggingIn = false;
-  late String token;
-  final Future <SharedPreferences> _prefs = SharedPreferences.getInstance();
+   String? token;
+   String? suc;
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   TextEditingController tokenController = TextEditingController();
   TextEditingController sucursalController = TextEditingController();
 
-
-  Future<void> _setToken(token) async {
+  Future _setToken() async {
     SharedPreferences prefs = await _prefs;
     await prefs.setString('token', tokenController.text.toString());
-
+    await prefs.setString('sucursal', sucursalController.text.toString());
+    setState((){
+      token = tokenController.text.toString();
+      suc = sucursalController.text.toString();
+    });
   }
 
   Future<void> _getToken() async {
     SharedPreferences prefs = await _prefs;
-    token = prefs.getString('token').toString();
+    token = prefs.getString('token')?.toString();
+    suc = prefs.getString('sucursal')?.toString();
+    print(suc);
+    print(token);
   }
 
+  clearPrefs() async {
+    SharedPreferences prefs = await _prefs;
+    prefs.remove('token');
+    prefs.remove('sucursal');
+    setState(() {
+      token = null;
+      suc = null;
+    });
+  }
 
   @override
   void initState() {
@@ -35,6 +51,37 @@ class _LoginScreenState extends State<LoginScreen> {
     _getToken();
   }
 
+  sucursalWidget(){
+    if (suc != null){
+      return Text(suc!);
+    }
+    return TextFormField(
+        controller: sucursalController,
+        decoration: InputDecoration(
+            icon: Icon(Icons.location_pin),
+            border: UnderlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(8),
+              ),
+            ),
+            labelText: 'Sucursal'));
+  }
+  tokenWidget(){
+    if (token != null){
+      return Text(token!);
+    }
+    return TextFormField(
+      controller: tokenController,
+      decoration: InputDecoration(
+          icon: Icon(Icons.token),
+          border: UnderlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(8),
+            ),
+          ),
+          labelText: 'token'),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,31 +107,18 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: EdgeInsets.only(top: 80, left: 24, right: 24),
           child: Column(
             children: [
-              TextField(
-                  controller: sucursalController,
-                  decoration: InputDecoration(
-                      border: UnderlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8),
-                        ),
-                      ),
-                      labelText: 'Sucursal')),
-              TextField(
-                controller: tokenController,
-                decoration: InputDecoration(
-                    border: UnderlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(8),
-                      ),
-                    ),
-                    labelText: 'token'),
-              ),
+              sucursalWidget(),
+              tokenWidget(),
               TextButton(
                   onPressed: () {
-                    _setToken;
-                    print(token);
+                    _setToken();
                   },
                   child: Text('Guardar')),
+              TextButton(
+                  onPressed: () {
+                    clearPrefs();
+                  },
+                  child: Text('limpiar')),
             ],
           ),
         ),
@@ -93,11 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
-    if (_loggingIn == false) {
-      null;
-    } else {
       Navigator.of(context)
           .push(MaterialPageRoute(builder: (context) => const BotonScreen()));
-    }
   }
 }
